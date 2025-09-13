@@ -45,7 +45,7 @@ class FdemdServer(Server):
         self.d_aux = None
         self.clients_data = SyncDataManager()
 
-    def handle_request(self, client_data: ClientPackage):
+    def handle_request(self, pkg: ClientPackage):
         action_map: dict[Actions, Callable[[ClientPackage], Any]] = {
             Actions.PUSH_INIT: self._push_init,
             Actions.PULL_INIT: self._pull_init,
@@ -53,12 +53,12 @@ class FdemdServer(Server):
             Actions.PULL_UPDATE: self._pull_update,
         }
 
-        action = action_map.get(client_data.action)
+        action = action_map.get(pkg.action)
         if action is not None:
-            return action(client_data)
+            return action(pkg)
         else:
-            logger.error(f"Unknown client requested action: {client_data.action}")
-            raise ValueError(f"Unknown requested action: {client_data.action}")
+            logger.error(f"Unknown client requested action: {pkg.action}")
+            raise ValueError(f"Unknown requested action: {pkg.action}")
 
     def _push_init(self, pkg: ClientPackage):
         # for the same init logic with original implementation, init using cid==1 data
