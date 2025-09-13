@@ -2,17 +2,27 @@ launcher:
   results: out/results
   repeat: 10
   save: true
-  algorithms: [BO, BO_LIGHT]
-  problems: [tetci2019, arxiv2017]
+  loglevel: INFO  # logging level [CRITICAL, ERROR, WARNING, INFO, DEBUG], default INFO
+  algorithms: [BO, BO_LIGHT]  # run these algorithms
+  problems: [tetci2019, arxiv2017]  # run algorithms on these problems
 
 reporter:
-  results: /Users/zxx/Workspace/Results
+  results: out/results
   algorithms:
-    - [BO, BO_LIGHT]
-  problems: [tetci2019, arxiv2017]
+    - [BO, BO_LIGHT]  # make comparison on these algorithms
+  # - [BO, BO_LIGHT, OTHER_ALG]
+  problems: [tetci2019, arxiv2017]  # compare algorithms on these problems
 
 algorithms:
-  BO_LIGHT:  # config for an ablation version
+  BO_LIGHT:  # config for an ablation version of BO
     base: BO  # specify the base algorithm
     client:
       ts_trials: 500  # default is 1000
+
+problems:
+  arxiv2017:
+    dim: [10, 20, 30 ] # make this problem's variations on these dimensions
+    np_per_dim: [1, 2, 4, 6] # make this problem's variations on these np_per_dim values
+    # this will generate 4*3=12 variations of this problem
+
+  # If you don't config a problem (tetci2019), it will use the default config and no variation
