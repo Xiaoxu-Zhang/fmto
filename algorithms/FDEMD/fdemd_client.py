@@ -1,11 +1,11 @@
 import numpy as np
 from numpy import ndarray
 from pyfmto.framework import Client, record_runtime
+from pyfmto.utilities import logger
 
 from .fdemd_utils import (
     RadialBasisFunctionNetwork as RBFNetwork,
     GeneticAlgorithm, Actions, ClientPackage)
-from ...utilities import logger
 
 ga_op = GeneticAlgorithm()
 
