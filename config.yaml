@@ -1,10 +1,10 @@
 launcher:
   results: out/results
-  repeat: 10
+  repeat: 2
   save: true
   loglevel: INFO  # logging level [CRITICAL, ERROR, WARNING, INFO, DEBUG], default INFO
-  algorithms: [BO, BO_LIGHT]  # run these algorithms
-  problems: [tetci2019, arxiv2017]  # run algorithms on these problems
+  algorithms: [FMTBO, FDEMD, BO, BO_LIGHT]  # run these algorithms
+  problems: [tetci2019]  # [arxiv2017] run algorithms on these problems
 
 reporter:
   results: out/results
@@ -20,9 +20,11 @@ algorithms:
       ts_trials: 500  # default is 1000
 
 problems:
-  arxiv2017:
-    dim: [10, 20, 30 ] # make this problem's variations on these dimensions
-    np_per_dim: [1, 2, 4, 6] # make this problem's variations on these np_per_dim values
-    # this will generate 4*3=12 variations of this problem
+  tetci2019:
+    fe_init: 30
+    fe_max: 35
+    # the following setting will generate 4*3=12 variations of this problem
+    #dim: [10, 20, 30 ]  make this problem's variations on these dimensions
+    #np_per_dim: [1, 2, 4, 6]  make this problem's variations on these np_per_dim values
 
-  # If you don't config a problem (tetci2019), it will use the default config and no variation
+  # If you don't config a problem (arxiv2017), it will use the default config and no variation
