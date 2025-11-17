@@ -1,30 +1,45 @@
 launcher:
-  results: out/results
-  repeat: 2
-  save: true
-  loglevel: INFO  # logging level [CRITICAL, ERROR, WARNING, INFO, DEBUG], default INFO
-  algorithms: [FMTBO, FDEMD, BO, BO_LIGHT]  # run these algorithms
-  problems: [tetci2019]  # [arxiv2017] run algorithms on these problems
+  results: out/results  # [optional] save results to this directory
+  repeat: 2             # [optional] repeat each experiment for this number of times
+  save: true            # [optional] save results to disk
+  loglevel: INFO        # [optional] log level [CRITICAL, ERROR, WARNING, INFO, DEBUG], default INFO
+  algorithms: [ADDFBO, BO, BO_LIGHT]  # run these algorithms
+  problems: [tetci2019, arxiv2017]  # run each algorithm on these problems
 
 reporter:
-  results: out/results
+  results: out/results             # [optional] load results from this directory
+  formats: [curve, excel, violin]  # generate these reports
   algorithms:
-    - [BO, BO_LIGHT]  # make comparison on these algorithms
-  # - [BO, BO_LIGHT, OTHER_ALG]
-  problems: [tetci2019, arxiv2017]  # compare algorithms on these problems
+    - [BO, BO_LIGHT]      # make comparison on these algorithms
+    - [ADDFBO, BO]        # and these algorithms
+  problems: [tetci2019, arxiv2017]  # use results that algorithms runs on these problems
+  kwargs:  # [optional] config for report formats
+    curve:
+      on_log_scale: true  # plot on log scale
+      merge: True         # merge all plots into one figure
+      suffix: '.png'      # save plots with this suffix (.svg and .pdf can't be merged)
+    violin:
+      quality: 5
 
-algorithms:
-  BO_LIGHT:  # config for an ablation version of BO
-    base: BO  # specify the base algorithm
+algorithms:   # [optional] config for each algorithm
+  BO_LIGHT:   # config for BO ablation study and use this name
+    base: BO  # str: specify the base algorithm
     client:
       ts_trials: 500  # default is 1000
 
-problems:
+problems:  # [optional] config for each problem
   tetci2019:
-    fe_init: 30
-    fe_max: 35
-    # the following setting will generate 4*3=12 variations of this problem
-    #dim: [10, 20, 30 ]  make this problem's variations on these dimensions
-    #np_per_dim: [1, 2, 4, 6]  make this problem's variations on these np_per_dim values
+    dim: 3         # int|[int]: dimension of the tasks
+    fe_init: 10    # int: initial FE, which is sampled by random when a task is initialized, default is dim * 5
+    fe_max: 25     # int: maximum FE, make sure this value is larger than fe_init, default is dim * 11
+    np_per_dim: 1  # int|[int]: number of partitions per dimension, default is 1
+    seed: 123      # int|[int]: random seed, default is 123
+    random_ctrl: weak  # str: random control, other options are 'strong', 'no', default is 'weak'
+  arxiv2017:
+    dim: 3
 
-  # If you don't config a problem (arxiv2017), it will use the default config and no variation
+  # Notes:
+  # 1. If a configuration was labeled [optional] in the comment, it is not required to specify it in the config file.
+  # 2. The 'int|[int]' in the problem parameters' comments means it support multiple values. e.g. 'dim: [3, 5]'.
+  # 3. All problem support other parameters (configured in tetci2019) except 'dim'.
+  # 4. See README for more instructions.
