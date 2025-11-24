@@ -4,20 +4,20 @@ launcher:
   save: true            # [optional] save results to disk
   loglevel: INFO        # [optional] log level [CRITICAL, ERROR, WARNING, INFO, DEBUG], default INFO
   algorithms: [ADDFBO, BO, BO_LIGHT]  # run these algorithms
-  problems: [tetci2019, arxiv2017]  # run each algorithm on these problems
+  problems: [Tetci2019, Arxiv2017]  # run each algorithm on these problems
 
-reporter:
-  results: out/results             # [optional] load results from this directory
-  formats: [curve, excel, violin]  # generate these reports
-  algorithms:
+reporter:  # [optional] config for reporter
+  results: out/results             # load results from this directory, default: launcher.results
+  formats: [curve, excel, violin]  # generate these formats of reports, default: [curve]
+  algorithms:                      # config for each algorithm, default: [launcher.algorithms]
     - [BO, BO_LIGHT]      # make comparison on these algorithms
     - [ADDFBO, BO]        # and these algorithms
-  problems: [tetci2019, arxiv2017]  # use results that algorithms runs on these problems
-  kwargs:  # [optional] config for report formats
+  problems: [Tetci2019, Arxiv2017]  # use results that algorithms runs on these problems, default: [launcher.problems]
+  params:  # config for report formats, use 'pyfmto list' and 'pyfmto show' to see available options and its params
     curve:
       on_log_scale: true  # plot on log scale
       merge: True         # merge all plots into one figure
-      suffix: '.png'      # save plots with this suffix (.svg and .pdf can't be merged)
+      suffix: '.jpg'      # save plots with this suffix (.svg and .pdf can't be merged)
     violin:
       quality: 5
 
@@ -28,15 +28,17 @@ algorithms:   # [optional] config for each algorithm
       ts_trials: 500  # default is 1000
 
 problems:  # [optional] config for each problem
-  tetci2019:
+  Tetci2019:
     dim: 3         # int|[int]: dimension of the tasks
-    fe_init: 10    # int: initial FE, which is sampled by random when a task is initialized, default is dim * 5
+    fe_init: 11    # int: initial FE, which is sampled by random when a task is initialized, default is dim * 5
     fe_max: 25     # int: maximum FE, make sure this value is larger than fe_init, default is dim * 11
-    np_per_dim: 1  # int|[int]: number of partitions per dimension, default is 1
+    npd: 1         # int|[int]: number of partitions per dimension, default is 1
     seed: 123      # int|[int]: random seed, default is 123
     random_ctrl: weak  # str: random control, other options are 'strong', 'no', default is 'weak'
-  arxiv2017:
+  Arxiv2017:
     dim: 3
+    fe_init: 20
+    fe_max: 25
 
   # Notes:
   # 1. If a configuration was labeled [optional] in the comment, it is not required to specify it in the config file.
