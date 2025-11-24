@@ -21,7 +21,12 @@ Create an environment (`conda` is recommended) and install PyFMTO:
 conda create -n fmto python=3.10
 conda activate fmto
 pip install pyfmto
+# Install requirements for algorithms
+pip install -r algorithms/ADDFBO/requirements.txt
+pip install -r algorithms/BO/requirements.txt
 ```
+
+> To run other algorithms, install their requirements first.
 
 Start the experiments:
 
