@@ -14,13 +14,10 @@ from pydacefit.corr import corr_gauss
 from pydacefit.dace import DACE
 from pydacefit.regr import regr_constant
 
-from pyfmto.framework import Client, ClientPackage, ServerPackage, record_runtime
+from pyfmto.framework import Client, record_runtime
 from pyfmto.utilities import logger
 
-from .iaffbo_utils import Actions
-
-
-# NOTE: RNG 将在客户端实例化为 self.rng 以便可复现实验
+from .iaffbo_utils import Actions, ClientPackage, ServerPackage
 
 
 class TorchMLPClassifier:
@@ -347,10 +344,10 @@ class IaffboClient(Client):
         # 3.5) try non-blocking pull aggregated params for initialization (previous round)
         pre_agg = self._try_pull_agg_for_init()
 
-        # 4) train classifier (PyTorch) with init params（若无聚合则使用本地随机初始化）
+        # 4) train classifier (PyTorch) with init params
         self._train_classifier(XX, yy, init_params=pre_agg)
 
-        # 5) pull aggregated params（本轮强同步）
+        # 5) pull aggregated params
         agg_params = self._pull_aggregated_params()
 
         # 6) pick classifier for search (50% aggregated vs local if available)
@@ -532,7 +529,6 @@ class IaffboClient(Client):
         pkg = ClientPackage(cid=self.id, action=Actions.PULL_UPDATE, data=None)
         res: ServerPackage = self.request_server(package=pkg, repeat=1, interval=0.0, msg='Try pull agg init')
         if res is not None and isinstance(res.data, AggData):
-            # 不更新 prev_ver，仅用于本轮初始化
             return res.data.agg_res
         return None
 

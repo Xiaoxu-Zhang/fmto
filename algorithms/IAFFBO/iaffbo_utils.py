@@ -1,5 +1,6 @@
 import numpy as np
 from enum import Enum, auto
+from pyfmto.framework import ClientPackage as Pkg
 
 
 class Actions(Enum):
@@ -14,6 +15,29 @@ class AggData:
         self.version = version
         self.src_num = src_num
         self.agg_res = agg_res
+
+
+class ServerPackage:
+    def __init__(
+            self,
+            desc: str,
+            data: dict = None,
+    ):
+        self.desc = desc
+        self.data = data
+
+
+class ClientPackage(Pkg):
+    def __init__(
+            self,
+            cid: int,
+            action: Enum,
+            version: int = None,
+            data: dict = None,
+    ):
+        super().__init__(cid, action)
+        self.version = version
+        self.data = data
 
 
 def flatten_params(weights: list[np.ndarray], biases: list[np.ndarray]) -> np.ndarray:

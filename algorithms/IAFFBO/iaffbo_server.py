@@ -4,10 +4,10 @@ from typing import Callable
 
 from sklearn.cluster import KMeans
 
-from pyfmto.framework import Server, ClientPackage, ServerPackage, DataArchive
+from pyfmto.framework import Server, DataArchive
 from pyfmto.utilities import logger
 
-from .iaffbo_utils import Actions, AggData, flatten_params_matlab_order, average_params
+from .iaffbo_utils import Actions, AggData, flatten_params_matlab_order, average_params, ClientPackage, ServerPackage
 
 
 class IaffboServer(Server):
