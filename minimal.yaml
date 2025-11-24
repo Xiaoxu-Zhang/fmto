@@ -1,0 +1,3 @@
+launcher:
+  algorithms: [ADDFBO, BO]  # No configuration is provided for BO_LIGHT, so we should remove it.
+  problems: [Tetci2019, Arxiv2017]

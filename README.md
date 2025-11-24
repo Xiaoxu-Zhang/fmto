@@ -57,6 +57,10 @@ The reports will be saved in the folder `out/results/<today>`
 This figure is to elaborate the relationship between `fmto` and `PyFMTO`. The Algorithm API and 
 Problem API shows in the upper part of this figure are the APIs provided by `PyFMTO`.
 
+It is designed to provide a platform for researchers to compare and evaluate the performance of 
+different FMTO algorithms. The repository is built on top of the PyFMTO library, which provides 
+a flexible and extensible framework for implementing FMTO algorithms.
+
 ## Templates
 
 ### Algorithm
@@ -80,19 +84,17 @@ instructions to configure the experiments.
 
 ### Minimal Config
 
-If we only config the required parameters, the config will be like this:
+The `minimal.yaml` file contains only the required parameters and can be used to run the 
+experiments.
 
-```yaml
-launcher:
-  algorithms: [ADDFBO, BO, BO_LIGHT]
-  problems: [tetci2019, arxiv2017]
+```bash
+pyfmto run -c minimal.yaml
+```
 
-reporter:
-  formats: [curve, excel, violin]
-  algorithms:
-    - [BO, BO_LIGHT]
-    - [ADDFBO, BO]
-  problems: [tetci2019, arxiv2017]
+And generate reports:
+
+```bash
+pyfmto report -c minimal.yaml
 ```
 
 ### Problem Config
