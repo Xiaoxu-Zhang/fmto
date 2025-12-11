@@ -13,7 +13,6 @@ class FmtboServer(Server):
     """
     def __init__(self, **kwargs):
         super().__init__()
-        kwargs = self.update_kwargs(kwargs)
         self.client_bounds = []
         self.clients_data = SyncDataManager()
         self.done_vers: set[int] = {-1}

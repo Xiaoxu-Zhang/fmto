@@ -19,7 +19,6 @@ class FmtboClient(Client):
     """
     def __init__(self, problem, **kwargs):
         super().__init__(problem)
-        kwargs = self.update_kwargs(kwargs)
 
         # init control args
         self.gamma = kwargs['gamma']

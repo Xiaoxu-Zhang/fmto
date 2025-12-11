@@ -18,7 +18,6 @@ class AddfboServer(Server):
 
     def __init__(self, **kwargs):
         super().__init__()
-        kwargs = self.update_kwargs(kwargs)
         self.d_aux_size = kwargs['d_aux_size']
         self.retain_ratio = kwargs['retain_ratio']
         self.global_gp_size = kwargs['global_gp_size']
@@ -30,7 +29,7 @@ class AddfboServer(Server):
         self.d_share_x: dict[int, np.ndarray] = {}
         self.d_share_y_avg = None
         self.clients_data = SyncDataManager()
-        self.set_agg_interval(0.3)
+        self.agg_interval = 0.3
 
     def handle_request(self, pkg: ClientPackage):
         if pkg.action == Actions.PULL_AUX:

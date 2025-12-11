@@ -24,7 +24,6 @@ class FdemdServer(Server):
     def __init__(self, **kwargs):
         super().__init__()
         # centers, spreads, w and b can be broadcast to clients
-        kwargs = self.update_kwargs(kwargs)
         self.ensemble_size = kwargs['ensemble_size']
         self.model_args = {
             'epoch': kwargs['epoch'],

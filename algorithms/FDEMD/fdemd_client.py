@@ -22,7 +22,6 @@ class FdemdClient(Client):
 
     def __init__(self, problem, **kwargs):
         super().__init__(problem)
-        kwargs = self.update_kwargs(kwargs)
 
         self.lg_type = kwargs['lg_type']
         self.max_gen = kwargs['max_gen']

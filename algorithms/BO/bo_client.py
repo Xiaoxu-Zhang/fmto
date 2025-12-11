@@ -14,7 +14,6 @@ class BoClient(Client):
     """
     def __init__(self, problem, **kwargs):
         super().__init__(problem)
-        kwargs = self.update_kwargs(kwargs)
         self.ts_trials = kwargs['ts_trials']
         self.num_seeds = kwargs['num_seeds']
         self.sync = kwargs['sync']

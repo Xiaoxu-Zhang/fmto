@@ -5,10 +5,8 @@ from .bo_utils import Actions, ClientPackage
 class BoServer(Server):
     def __init__(self, **kwargs):
         super().__init__()
-        self.update_kwargs(kwargs)
         self.versions = {}
         self.ver_ok = -1
-        self.set_agg_interval(0.1)
 
     def handle_request(self, pkg: ClientPackage):
         if pkg.action == Actions.PUSH_UPDATE:

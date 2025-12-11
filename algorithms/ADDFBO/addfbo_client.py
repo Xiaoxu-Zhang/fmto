@@ -27,7 +27,6 @@ class AddfboClient(Client):
     def __init__(self, problem, **kwargs):
         super().__init__(problem=problem)
         # init control args
-        kwargs = self.update_kwargs(kwargs)
         self.problem.auto_update_solutions = True
         self.gamma = kwargs['gamma']
         self.kappa = kwargs['kappa']
