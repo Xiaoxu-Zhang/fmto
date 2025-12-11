@@ -4,26 +4,28 @@ from random import random
 from pyfmto.framework import Client, record_runtime
 from pyfmto.utilities import logger
 
-from .alg_utils import ClientPackage, Actions
+from .demo_utils import ClientPackage, Actions
 
 
-class AlgClient(Client):
+class DemoClient(Client):
     """
     alpha: 0.2
     """
     def __init__(self, problem, **kwargs):
         super().__init__(problem)
-        kwargs = self.update_kwargs(kwargs)
         self.alpha = kwargs['alpha']
         self.version = 1  # version for client-server sync or inter-client process sync
 
         # update solutions automatically, so you just need to call
-        # self.problem.evaluate(x)
+        # self.problem.evaluate(x), the solution will be updated
         self.problem.auto_update_solutions = True
-        # otherwise, you need to update solutions manually:
-        # x = ...
-        # y = self.problem.evaluate(x)
-        # self.problem.solution.append(x, y)
+
+        # otherwise, if you have other processing before update solutions,
+        # you need to update manually after the processing.
+        #
+        #     x = ...
+        #     y = self.problem.evaluate(x)
+        #     self.problem.solution.append(x, y)
 
     @record_runtime("Total")
     def optimize(self):
@@ -40,7 +42,7 @@ class AlgClient(Client):
 
     @record_runtime()
     def push(self):
-        # Commonly, the push() is to send the knowledge data
+        # Here, the push() is to send the knowledge data
         # to the server. So, data should be stored in the pkg.
         # The push operation will be response timely, so the
         # 'repeat' usually keep its default.
@@ -49,7 +51,7 @@ class AlgClient(Client):
 
     @record_runtime()
     def pull(self):
-        # Commonly, the pull() is to get the latest data from the server
+        # Here, the pull() is to get the latest data from the server
         pkg = ClientPackage(cid=self.id, action=Actions.PULL, version=self.version)
 
         # if response from the server is None or not meet the requirement
@@ -63,7 +65,7 @@ class AlgClient(Client):
         # Define your checking logic here
         # If return True, the package will be accepted, which
         # will be returned by the self.request_server()
-        # If return False, the package will be rejected, which
+        # If return False, the package will be dropped, which
         # will cause auto retry, the max retry times can be set by
         # self.request_server(..., repeat=10), default is 10
-        return True
+        return pkg is not None

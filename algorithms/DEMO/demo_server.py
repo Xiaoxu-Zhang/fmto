@@ -2,16 +2,15 @@ from typing import Any
 
 from pyfmto.framework import Server, SyncDataManager
 
-from algorithms.ALG.alg_utils import Actions, ClientPackage
+from algorithms.DEMO.demo_utils import Actions, ClientPackage
 
 
-class AlgServer(Server):
+class DemoServer(Server):
     """
     beta: 0.5
     """
     def __init__(self, **kwargs):
         super().__init__()
-        kwargs = self.update_kwargs(kwargs)
         self.beta = kwargs['beta']
         self.clients_data = SyncDataManager()
 
@@ -27,19 +26,20 @@ class AlgServer(Server):
             raise ValueError(f"Unknown action {pkg.action}")
 
     def aggregate(self):
-        # get the latest same version that all clients have uploaded
+        # The latest consistent version uploaded by all clients
         ver_ready = self.clients_data.available_src_ver
 
-        # aggregate data for each client
-        # the self.sorted_ids is the sorted client ids, which is started from 1
         if not self.should_agg:
             return
+
+        # aggregate data for each client
+        # the self.sorted_ids is the sorted client ids
         for cid in self.sorted_ids:
             if self.clients_data.get_res(cid=cid, version=ver_ready) is not None:
                 # if the client's agg result existed, skip the agg process
                 continue
             # We store the ClientPackage instance directly in the clients_data
-            # So we can get the same type of data
+            # So we can get the same type of data, use type hint for auto-completion
             src: ClientPackage = self.clients_data.get_src(cid=cid, version=ver_ready)
             self.clients_data.update_res(
                 cid=cid,
@@ -49,6 +49,7 @@ class AlgServer(Server):
 
     @property
     def should_agg(self) -> bool:
+        # check whether the agg process should be started
         ver_ready = self.clients_data.available_src_ver != -1
         clients_ready = self.clients_data.num_clients == self.num_clients
         return ver_ready and clients_ready
