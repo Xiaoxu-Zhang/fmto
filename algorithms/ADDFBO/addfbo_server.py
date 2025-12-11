@@ -43,7 +43,7 @@ class AddfboServer(Server):
 
     def aggregate(self):
         target_ver = self.clients_data.available_src_ver
-        if target_ver > self.lts_res_ver and self.num_clients == self.clients_data.num_clients:
+        if self.should_agg(target_ver):
             agg_res = self.aggregation(version=target_ver)
             self.clients_data.update_res(
                 cid=0,
@@ -55,12 +55,8 @@ class AddfboServer(Server):
     def lts_res_ver(self):
         return self.clients_data.lts_res_ver(0)
 
-    @property
-    def src_vers(self):
-        src_versions = []
-        for cid in self.sorted_ids:
-            src_versions.append(self.clients_data.lts_src_ver(cid))
-        return np.array(src_versions)
+    def should_agg(self, target_ver):
+        return target_ver > self.lts_res_ver and self.num_clients == self.clients_data.num_clients
 
     def _handle_pull_aux(self, pkg: ClientPackage):
         self.dim = pkg.dim
