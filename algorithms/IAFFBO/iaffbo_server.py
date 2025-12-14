@@ -1,12 +1,9 @@
 import numpy as np
 from typing import Any
-
 from sklearn.cluster import KMeans
-
 from pyfmto.framework import Server, SyncDataManager
 from pyfmto.utilities import logger
-
-from .iaffbo_utils import Actions, flatten_params_matlab_order, average_params, ClientPackage
+from .iaffbo_utils import Actions, average_params, ClientPackage
 
 
 class IaffboServer(Server):
@@ -42,35 +39,40 @@ class IaffboServer(Server):
     def _pull_update(self, client_data: ClientPackage) -> Any:
         return self.clients_data.get_res(client_data.cid, client_data.version)
 
-    def should_agg(self, cid: int) -> bool:
-        a = self.clients_data.num_clients == self.num_clients
-        b = self.clients_data.get_res(cid, self.clients_data.available_src_ver)
-        return a and (b is not None)
+    @property
+    def should_agg(self) -> bool:
+        a = self.num_clients > 0
+        b = self.clients_data.num_clients == self.num_clients
+        lts_res_ver = min([self.clients_data.lts_res_ver(i) for i in self.sorted_ids])
+        lts_src_ver = min([self.clients_data.lts_src_ver(i) for i in self.sorted_ids])
+        c = lts_res_ver < lts_src_ver
+        return a and b and c
 
     def aggregate(self):
-        if self.num_clients == 0:
+        logger.info(
+            f"Aggregating context\n"
+            f"Should agg: {self.should_agg}\n"
+            f"{self.clients_data.data_info}"
+        )
+        if not self.should_agg:
             return
         target_ver = self.clients_data.available_src_ver
         vectors = []
         params_by_cid: dict[int, dict] = {}
         for cid in self.sorted_ids:
-            if not self.should_agg(cid):
-                continue
             src = self.clients_data.get_src(cid, target_ver)
-            vec = src.get('vector')
-            if vec is None or (hasattr(vec, 'size') and vec.size == 0):
-                weights = [np.array(w) for w in src.get('weights', [])]
-                biases = [np.array(b) for b in src.get('biases', [])]
-                vec = flatten_params_matlab_order(weights, biases)
+            logger.debug(f"Client {cid} src data {repr(list(src.keys())) if src is not None else None}")
+            vec = src.get('vector', np.ndarray([]))
             vec = np.array(vec).reshape(-1)
             if vec.size == 0:
                 vec = np.zeros(4, dtype=float)
             vectors.append(vec)
             params_by_cid[cid] = {
-                'weights': [np.array(w) for w in src.get('weights', [])],
-                'biases': [np.array(b) for b in src.get('biases', [])],
+                'weights': src.get('weights', []),
+                'biases': src.get('biases', []),
             }
         if not vectors:
+            logger.warning(f"No vectors to aggregate, target_ver {target_ver}")
             return
         max_len = max(v.shape[0] for v in vectors)
         V = np.stack([np.pad(v, (0, max_len - v.shape[0])) for v in vectors], axis=0)

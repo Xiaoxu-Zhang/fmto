@@ -62,16 +62,9 @@ def flatten_params_matlab_order(weights: list[np.ndarray], biases: list[np.ndarr
     """
     if not weights:
         return np.array([], dtype=float)
-    parts: list[np.ndarray] = []
-    # IW
-    parts.append(weights[0].reshape(-1))
-    # LWs
-    for w in weights[1:]:
-        parts.append(w.reshape(-1))
-    # biases in layer order
-    for b in biases:
-        parts.append(b.reshape(-1))
-    return np.concatenate(parts, axis=0)
+
+    all_params = weights + biases
+    return np.concatenate([p.reshape(-1) for p in all_params], axis=0)
 
 
 def average_params(params_list: list[dict]) -> dict:

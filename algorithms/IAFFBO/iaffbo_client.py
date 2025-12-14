@@ -1,4 +1,7 @@
 import math
+import pprint
+import traceback
+
 import numpy as np
 from typing import Optional, Any
 
@@ -58,6 +61,7 @@ class IaffboClient(Client):
         # sync
         self.version = 1
         self.agg_params: dict[str, Any] = {}
+        self.clf_for_search: Optional[TorchMLPClassifier] = None
 
     def optimize(self):
         if not self.solutions.initialized:
@@ -75,31 +79,21 @@ class IaffboClient(Client):
 
     @record_runtime('Step')
     def _step(self):
-        X_fit, Y_fit = self.fit_gp()
-        y_norm = self.problem.normalize_y(Y_fit)
-        candidates, acq_evals = self.init_candidates(y_norm)
-        XX, yy = self._build_pairwises(X_fit, y_norm.reshape(-1, 1), candidates, acq_evals)
-
-        pre_agg = self._pull_update()
-        self._train_classifier(XX, yy, init_params=pre_agg)
-        self._push_local_classifier()
-        self._pull_aggregated_params()
-        clf_for_search = self._build_classifier()
-
-        # 7) evolutionary search guided by classifier
-        x_next = self._winner_loser_search(clf_for_search)
+        self._train_classifier()
+        self._push_clf_params()
+        self._pull_agg_params()
+        self._build_classifier()
+        x_next = self._winner_loser_search()
         self.problem.evaluate(x_next)
-        self.record_round_info('FE', str(self.solutions.size))
-        self.record_round_info('Best', f"{self.solutions.y_min:.2f}")
         self.version += 1
 
     def _build_classifier(self):
         if self.transfer and self.rng.random() < 0.5:
-            try:
-                return self._build_clf_from_params(self.agg_params)
-            except Exception as e:
-                logger.debug(f"Client {self.id} build clf from agg params failed: {e}")
-        return self._clf
+            self.clf_for_search = self._build_clf_from_params(self.agg_params)
+            logger.debug(f"{self.name} Built clf_for_search with agg params")
+        else:
+            self.clf_for_search = self._clf
+            logger.debug(f"{self.name} Set clf_for_search by local clf")
 
     def fit_gp(self):
         X = self.solutions.x
@@ -113,6 +107,7 @@ class IaffboClient(Client):
         except Exception:
             X_fit, Y_fit = X, Y
         self.gp.fit(X_fit, self.problem.normalize_y(Y_fit))
+        logger.debug(f"{self.name} GP fit: {X_fit.shape[0]} points")
         return X_fit, Y_fit
 
     def init_candidates(self, y_norm: np.ndarray):
@@ -135,7 +130,11 @@ class IaffboClient(Client):
         else:
             return (mean - 2.0 * std).reshape(-1, 1)
 
-    def _build_pairwises(self, X, Y, cand, acq):
+    def _build_pairwise(self):
+        X, Y = self.fit_gp()
+        y_norm = self.problem.normalize_y(Y)
+        cand, acq = self.init_candidates(y_norm)
+
         ya = Y.flatten()
         Xa = X
         Xb = cand
@@ -151,9 +150,11 @@ class IaffboClient(Client):
         x_res, y_res = XX[shuf], yy[shuf]
         if self.label_mode == 'matlab_two':
             mask = y_res != 0
-            return x_res[mask], y_res[mask]
+            res = x_res[mask], y_res[mask]
         else:
-            return x_res, y_res
+            res = x_res, y_res
+        logger.debug(f"{self.name} Pairwise built: {res[0].shape[0]} pairs")
+        return res
 
     def _pairs_from(self, X: np.ndarray, v: np.ndarray, max_pairs: int):
         n = X.shape[0]
@@ -200,7 +201,8 @@ class IaffboClient(Client):
         Xj = (Xj - lb) / den
         return np.hstack([Xi, Xj])
 
-    def _train_classifier(self, XX: np.ndarray, yy: np.ndarray, init_params: Optional[dict] = None):
+    def _train_classifier(self):
+        XX, yy = self._build_pairwise()
         if XX.size == 0:
             self._clf = None
             return
@@ -210,12 +212,12 @@ class IaffboClient(Client):
         h3 = int(max(2, d // 2))
         num_classes = 2 if self.label_mode == 'matlab_two' else 3
         clf = TorchMLPClassifier(input_dim=d, hidden=(h1, h2, h3), num_classes=num_classes, init_mode=self.nn_init)
-        if init_params is not None and init_params.get('weights'):
+        if self.agg_params is not None and self.agg_params.get('weights'):
             try:
-                clf.set_params({'weights': [np.array(w) for w in init_params['weights']],
-                                'biases': [np.array(b) for b in init_params['biases']]})
+                clf.set_params({'weights': self.agg_params['weights'],
+                                'biases': self.agg_params['biases']})
             except Exception:
-                pass
+                logger.error(f"{self.name} set params failed: \n{traceback.print_exc()}")
         # stratified split 3/4 for train per class (ceil as in MATLAB)
         labels = yy.reshape(-1)
         uniq = np.unique(labels)
@@ -249,39 +251,49 @@ class IaffboClient(Client):
                     y_true = np.where(y_true < 0, -1, 1)
                 p_err = float(np.mean(pred != y_true))
                 self.record_round_info('p_err', f"{p_err:.3f}")
+        logger.debug(f"{self.name} Classifier built with agg_params")
         self._clf = clf
 
-    def _push_local_classifier(self):
-        params = self._clf.get_params() if self._clf is not None else {'weights': [], 'biases': []}
-        if params['weights']:
+    @staticmethod
+    def str_dict(data: Optional[dict]):
+        return pprint.pformat(data, indent=2, width=40, compact=False)
+
+    def _push_clf_params(self):
+        params = self._clf.get_params() if self._clf is not None else None
+        if params is not None:
             from .iaffbo_utils import flatten_params_matlab_order
             data = {
                 'vector': flatten_params_matlab_order(params['weights'], params['biases']),
-                'weights': params['weights'],
-                'biases': params['biases'],
-                'size': (2 if self.label_mode == 'matlab_two' else 3)}
+                'size': 2 if self.label_mode == 'matlab_two' else 3
+            }
+            data.update(params)
         else:
-            data = {'vector': np.array([]), 'weights': [], 'biases': [], 'size': 0}
+            data = {}
         pkg = ClientPackage(cid=self.id, action=Actions.PUSH_UPDATE, version=self.version, data=data)
         self.request_server(package=pkg, msg='Push local classifier')
+        logger.debug(f"Client {self.id} push classifier: {repr(list(data.keys()))}")
 
-    def _pull_update(self) -> Optional[dict]:
+    def _pull_init_params(self) -> Optional[dict]:
         # Non-blocking try: if already has an aggregated model (from previous round), return it
         pkg = ClientPackage(cid=self.id, action=Actions.PULL_UPDATE, version=self.version, data=None)
         return self.request_server(package=pkg, repeat=1, interval=0.0, msg='Try pull agg init')
 
-    def _pull_aggregated_params(self) -> Optional[dict]:
+    def _pull_agg_params(self) -> Optional[dict]:
         # Strong sync: block until new aggregated version is available
         pkg = ClientPackage(cid=self.id, action=Actions.PULL_UPDATE, version=self.version, data=None)
-        self.agg_params = self.request_server(package=pkg, repeat=100, interval=0.5, msg='Pull aggregated classifier')
+        self.agg_params = self.request_server(package=pkg, repeat=100, interval=1., msg='Pull aggregated classifier')
 
     def check_pkg(self, pkg) -> bool:
         return pkg is not None
 
     def _build_clf_from_params(self, params: dict):
-        weights = [np.array(w) for w in params.get('weights', [])]
-        biases = [np.array(b) for b in params.get('biases', [])]
+        if params is None:
+            logger.warning(f"{self.name} Classifier params is None")
+            return self._clf
+        weights = params.get('weights', [])
+        biases = params.get('biases', [])
         if not weights or not biases:
+            logger.warning(f"{self.name} Classifier params value is empty")
             return self._clf
         # MATLAB orientation: weight[0] (out1,in) ⇒ input_dim = in
         d_in = weights[0].shape[1]
@@ -299,11 +311,12 @@ class IaffboClient(Client):
         return clf
 
     @record_runtime('Search')
-    def _winner_loser_search(self, clf) -> np.ndarray:
+    def _winner_loser_search(self) -> np.ndarray:
         lb = self.lb if isinstance(self.lb, np.ndarray) else np.ones(self.dim) * self.lb
         ub = self.ub if isinstance(self.ub, np.ndarray) else np.ones(self.dim) * self.ub
         popsize = max(4, self.pop_size)
-        if clf is None:
+        if self.clf_for_search is None:
+            logger.warning(f"{self.name} clf for search is None, random uniform a new x")
             return self.problem.random_uniform_x(1).reshape(-1)
         Decs = self.problem.random_uniform_x(popsize)
         # ensure even population size
@@ -317,7 +330,7 @@ class IaffboClient(Client):
             XX_pairs = np.hstack([Decs[loser], Decs[winner]])
             XX_pairs_n = self._normalize_pairs(XX_pairs)
             try:
-                pred = clf.predict(XX_pairs_n)
+                pred = self.clf_for_search.predict(XX_pairs_n)
             except Exception:
                 pred = np.ones(loser.shape[0], dtype=int)
             repl = np.where(pred == -1)[0]
