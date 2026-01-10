@@ -5,7 +5,6 @@ This document outlines the coding rules for all
 
 ---
 
-
 ## ❌ Avoid Absolute Imports
 
 When you implement a new `algorithm`/`problem`, you **should** use relative imports to ensure
@@ -28,7 +27,6 @@ PyFMTO.
 - ✅ `from .demo_utils import Actions`
 - ✅ `from ..BO.bo_utils import ThompsonSampling`
 - ✅ `from ..benchmarks import Ackley`
-
 
 ## 📦 Export Public Classes
 
