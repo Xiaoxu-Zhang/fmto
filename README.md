@@ -68,9 +68,12 @@ a flexible and extensible framework for implementing FMTO algorithms.
 
 ## Templates
 
+Before implementing a new algorithm or problem, it is recommended to read the
+[CONVENTIONS](CONVENTIONS.md)
+
 ### Algorithm
 
-The `ALG` can be used as a template for implementing a new algorithm, you can make a copy of 
+The `algorithms/DEMO` can be used as a template for implementing a new algorithm, you can make a copy of 
 `ALG` and follow the instructions to implement a new one.
 
 > Note: The package name is the algorithm name in the experiment.
