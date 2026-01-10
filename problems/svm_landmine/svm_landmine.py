@@ -4,7 +4,6 @@ from scipy.io import loadmat
 from sklearn import svm
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
-
 from pyfmto.problem import MultiTaskProblem as Mtp, SingleTaskProblem as Stp
 
 __all__ = ["SvmLandmine"]

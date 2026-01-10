@@ -1,9 +1,8 @@
 import numpy as np
 from dataclasses import dataclass
 from numpy import ndarray
-from typing import Tuple
-
 from pyfmto.problem import MultiTaskProblem as Mtp, SingleTaskProblem as Stp
+from typing import Tuple
 
 __all__ = ["Gecco2020"]
 
