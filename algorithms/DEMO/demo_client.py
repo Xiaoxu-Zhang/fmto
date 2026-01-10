@@ -1,11 +1,9 @@
 import time
 from random import random
-
 from pyfmto.framework import Client, record_runtime
 from pyfmto.utilities import logger
 
 from .demo_utils import ClientPackage, Actions
-
 
 class DemoClient(Client):
     """

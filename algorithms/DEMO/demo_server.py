@@ -1,8 +1,7 @@
 from typing import Any
-
 from pyfmto.framework import Server, SyncDataManager
 
-from algorithms.DEMO.demo_utils import Actions, ClientPackage
+from .demo_utils import Actions, ClientPackage
 
 
 class DemoServer(Server):
