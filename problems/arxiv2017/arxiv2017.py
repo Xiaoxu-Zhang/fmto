@@ -2,7 +2,7 @@ import numpy as np
 from pathlib import Path
 from scipy.io import loadmat
 
-from pyfmto.problems import MultiTaskProblem as Mtp
+from pyfmto.problem import MultiTaskProblem as Mtp
 from ..benchmarks import (
     Ackley,
     Griewank,

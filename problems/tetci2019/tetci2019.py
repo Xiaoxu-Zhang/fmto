@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import ndarray
 
-from pyfmto.problems import MultiTaskProblem as Mtp
+from pyfmto.problem import MultiTaskProblem as Mtp
 from ..benchmarks import (
     Ackley,
     Griewank,

@@ -3,7 +3,7 @@ Note: Ensure the defined problem is imported in the __init__.py file.
 """
 
 import numpy as np
-from pyfmto.problems import SingleTaskProblem, MultiTaskProblem
+from pyfmto.problem import SingleTaskProblem, MultiTaskProblem
 from ..benchmarks import benchmarks
 from typing import Union
 

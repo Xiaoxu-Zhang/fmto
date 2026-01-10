@@ -33,7 +33,7 @@ Implementation:
 
 import numpy as np
 
-from pyfmto.problems import SingleTaskProblem as Stp
+from pyfmto.problem import SingleTaskProblem as Stp
 
 __all__ = [
     "Ackley",

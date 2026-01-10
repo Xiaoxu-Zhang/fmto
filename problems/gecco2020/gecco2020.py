@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from numpy import ndarray
 from typing import Tuple
 
-from pyfmto.problems import MultiTaskProblem as Mtp, SingleTaskProblem as Stp
+from pyfmto.problem import MultiTaskProblem as Mtp, SingleTaskProblem as Stp
 
 __all__ = ["Gecco2020"]
 

@@ -1,5 +1,5 @@
 import importlib
-from pyfmto.problems import SingleTaskProblem as Stp, MultiTaskProblem as Mtp
+from pyfmto.problem import SingleTaskProblem as Stp, MultiTaskProblem as Mtp
 
 __all__ = ['Cec2022']
 

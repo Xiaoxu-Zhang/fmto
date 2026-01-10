@@ -1,7 +1,7 @@
 from pathlib import Path
 from scipy.io import loadmat
 from typing import Literal, Type
-from pyfmto.problems import (MultiTaskProblem as Mtp, SingleTaskProblem)
+from pyfmto.problem import MultiTaskProblem as Mtp, SingleTaskProblem
 
 from .. import benchmarks
 
