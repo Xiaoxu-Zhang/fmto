@@ -3,8 +3,11 @@ launcher:
   repeat: 2             # [optional] repeat each experiment for this number of times
   save: true            # [optional] save results to disk
   loglevel: INFO        # [optional] log level [CRITICAL, ERROR, WARNING, INFO, DEBUG], default INFO
+  snapshot: true        # [optional] If create snapshot of the experiment
+  verbose: false        # [optional] Save detailed information for each repeat run
+  packages: []          # [optional] Record the version of these packages
   algorithms: [ADDFBO, BO, BO_LIGHT]  # run these algorithms
-  problems: [Tetci2019, Arxiv2017]  # run each algorithm on these problems
+  problems: [tetci2019, arxiv2017]  # run each algorithm on these problems
 
 reporter:  # [optional] config for reporter
   results: out/results             # load results from this directory, default: launcher.results
@@ -12,7 +15,7 @@ reporter:  # [optional] config for reporter
   algorithms:                      # config for each algorithm, default: [launcher.algorithms]
     - [BO, BO_LIGHT]      # make comparison on these algorithms
     - [ADDFBO, BO]        # and these algorithms
-  problems: [Tetci2019, Arxiv2017]  # use results that algorithms runs on these problems, default: [launcher.problems]
+  problems: [tetci2019, arxiv2017]  # use results that algorithms runs on these problems, default: [launcher.problems]
   params:  # config for report formats, use 'pyfmto list' and 'pyfmto show' to see available options and its params
     curve:
       on_log_scale: true  # plot on log scale
@@ -28,14 +31,14 @@ algorithms:   # [optional] config for each algorithm
       ts_trials: 500  # default is 1000
 
 problems:  # [optional] config for each problem
-  Tetci2019:
+  tetci2019:
     dim: 3         # int|[int]: dimension of the tasks
     fe_init: 11    # int: initial FE, which is sampled by random when a task is initialized, default is dim * 5
     fe_max: 25     # int: maximum FE, make sure this value is larger than fe_init, default is dim * 11
     npd: 1         # int|[int]: number of partitions per dimension, default is 1
     seed: 123      # int|[int]: random seed, default is 123
     random_ctrl: weak  # str: random control, other options are 'strong', 'no', default is 'weak'
-  Arxiv2017:
+  arxiv2017:
     dim: 3
     fe_init: 20
     fe_max: 25
