@@ -15,12 +15,13 @@ git clone https://github.com/Xiaoxu-Zhang/fmto.git
 cd fmto
 ```
 
-Create an environment (`conda` is recommended) and install PyFMTO:
+Create an environment and install dependencies:
 
 ```bash
 conda create -n fmto python=3.10
 conda activate fmto
-pip install pyfmto
+# Install basic requirements
+pip install -r requirements.txt
 # Install requirements for algorithms
 pip install -r algorithms/ADDFBO/requirements.txt
 pip install -r algorithms/BO/requirements.txt
@@ -40,18 +41,18 @@ Generate reports:
 pyfmto report
 ```
 
-The reports will be saved in the folder `out/results/<today>`
+The reports will be saved in the folder `path/to/results/<today>`
 
-> **Note**: 
+> **Notes**: 
 > 1. PyFMTO saves the results of each repeat experiment in a separate file to the folder
-> `out/results/<algorithm>/<problem>/<NPD>/Run <run_id>.msgpack`, where `<NPD>` is IID (if 
-> np_per_dim=1) or NIIDk (if np_per_dim=k > 1).
+> `path/to/results/<algorithm>/<problem>/NPD<npd>/Run <run_id>.msgpack`, where `npd` is the number 
+> of partitions per dimension.
 > 2. PyFMTO support continuous experiments, you can stop the experiment at any time and resume it 
 > later by running `pyfmto run` again. 
 > 3. PyFMTO will not save the results of the stopped experiments, in other words, only the 
 > results of
 > the normally finished experiments will be saved. 
-> 4. To terminate the experiments, press `Ctrl+C` (Windows) or `Command+C` (macOS) in the terminal.
+> 4. To terminate the experiments, press `Ctrl+C` (Windows/Linux) or `Command+C` (macOS) in the terminal.
 
 ## Structure
 
@@ -71,26 +72,24 @@ a flexible and extensible framework for implementing FMTO algorithms.
 Before implementing a new algorithm or problem, it is recommended to read the
 [CONVENTIONS](CONVENTIONS.md)
 
-### Algorithm
+- **Algorithm**: The `algorithms/DEMO` can be used as a template for implementing a new algorithm, 
+ you can make a copy of `DEMO` and follow the instructions to implement a new one.
+- **Problem**: The `problems/demo` can be used as a template for implementing a new problem, you 
+ can make a copy of `demo` and follow the instructions to implement a new one.
+- **Config**: The `config.yaml` provides instructions for configuring your own experiments.
 
-The `algorithms/DEMO` can be used as a template for implementing a new algorithm, you can make a copy of 
-`ALG` and follow the instructions to implement a new one.
+> Note: The package name is the algorithm/problem name used in the configuration.
 
-> Note: The package name is the algorithm name in the experiment.
+## Configuration
 
-### Problem
+PyFMTO allows you to configure the experiments through a configuration file. It will try to use 
+`config.yaml` if no configuration file is specified through the `-c/--config <filename>` option in
+CLI. 
 
-The `PROB` can be used as a template for implementing a new problem, you can make a copy of 
-`PROB` and follow the instructions to implement a new one.
+If `config.yaml` does not exist and no another configuration file is specified, the `run` and 
+`report` commands will fail.
 
-### Config
-
-The `config.yaml` can be used as a template for configuring the experiments, you can follow the 
-instructions to configure the experiments.
-
-## About Config
-
-### Minimal Config
+### Minimal
 
 The `minimal.yaml` file contains only the required parameters and can be used to run the 
 experiments.
@@ -110,7 +109,34 @@ pyfmto report -c minimal.yaml
 1. There might be some problem not support other different dim, e.g. SvmLandmine, a realworld 
    problem.
 2. You can get the default value of all parameters of problems, algorithms and report formats by 
-   pyfmto CLI.
+   `pyfmto show <xxx>`.
+
+### Multiple Sources
+
+If there are multiple sources of algorithms/problems implemented, you can specify the additional
+sources by adding the `<absolute path to source>` to the `sources` section in `config.yaml`. For
+example, if there are two sources:
+
+```text
+/absolute/path/to/source1
+    ├──algorithms
+    └──problems
+
+/absolute/path/to/source2
+    ├──algorithms
+    └──problems
+```
+
+Specify the sources in config file:
+
+```yaml
+launcher:
+  sources: [/absolute/path/to/source1, /absolute/path/to/source2]
+  # other configuration
+```
+
+> The current working directory, where the launcher is executed, will be the only source if no 
+> additional sources are provided in config file.
 
 ## PyFMTO CLI
 
