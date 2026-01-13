@@ -42,7 +42,7 @@ Add import statements for all public-facing classes in the corresponding `__init
     from .demo_client import DemoClient
     from .demo_server import DemoServer
     ```
-- Problem Module `problems/DEMO/__init__.py` 
+- Problem Module `problems/demo/__init__.py` 
     ```python
     from .demo import Demo
     ```
