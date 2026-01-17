@@ -3,7 +3,7 @@ import numpy as np
 from collections import defaultdict
 from pathlib import Path
 from pyfmto.framework import Client, record_runtime
-from pyfmto.utilities import logger
+from pyfmto.utilities.loggers import logger
 
 from .addfbo_utils import SmtModel, DifferentialEvolution, Actions, ClientPackage
 

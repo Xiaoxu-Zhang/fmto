@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import ndarray
 from pyfmto.framework import Client, record_runtime
-from pyfmto.utilities import logger
+from pyfmto.utilities.loggers import logger
 
 from .fdemd_utils import (
     RadialBasisFunctionNetwork as RBFNetwork,

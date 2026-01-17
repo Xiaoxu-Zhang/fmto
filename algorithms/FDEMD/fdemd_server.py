@@ -4,7 +4,7 @@ from objprint import objprint
 from scipy.spatial.distance import cdist
 from typing import Callable, Any
 from pyfmto.framework import Server, SyncDataManager
-from pyfmto.utilities import logger
+from pyfmto.utilities.loggers import logger
 
 from .fdemd_utils import (
     RadialBasisFunctionNetwork as RBFNetwork,

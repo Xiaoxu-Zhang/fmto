@@ -6,7 +6,7 @@ from pyDOE import lhs
 from scipy.spatial.distance import cdist
 from sklearn.cluster import KMeans
 from tabulate import tabulate
-from pyfmto.utilities import logger
+from pyfmto.utilities.loggers import logger
 from pyfmto.framework import ClientPackage as Pkg
 
 

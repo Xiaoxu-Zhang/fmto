@@ -10,7 +10,7 @@ from pydacefit.dace import DACE
 from pydacefit.regr import regr_constant
 
 from pyfmto.framework import Client, record_runtime
-from pyfmto.utilities import logger
+from pyfmto.utilities.loggers import logger
 
 from .iaffbo_utils import Actions, ClientPackage, TorchMLPClassifier
 

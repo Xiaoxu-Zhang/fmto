@@ -1,7 +1,7 @@
 import numpy as np
 from typing import Callable, Any
 from pyfmto.framework import Server, SyncDataManager
-from pyfmto.utilities import logger
+from pyfmto.utilities.loggers import logger
 
 from .fmtbo_utils import init_samples, Actions, ClientPackage
 

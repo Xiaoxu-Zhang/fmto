@@ -3,7 +3,7 @@ from pyDOE import lhs
 from tabulate import tabulate
 
 from pyfmto.framework import Server, SyncDataManager
-from pyfmto.utilities import logger
+from pyfmto.utilities.loggers import logger
 from .addfbo_utils import Actions, ClientPackage
 
 

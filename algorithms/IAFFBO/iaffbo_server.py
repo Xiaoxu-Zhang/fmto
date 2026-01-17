@@ -2,7 +2,7 @@ import numpy as np
 from typing import Any
 from sklearn.cluster import KMeans
 from pyfmto.framework import Server, SyncDataManager
-from pyfmto.utilities import logger
+from pyfmto.utilities.loggers import logger
 from .iaffbo_utils import Actions, average_params, ClientPackage
 
 
